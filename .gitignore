@@ -1,0 +1,105 @@
+## =========================================================================
+## Secrets & environment — NEVER commit real credentials (applies repo-wide,
+## both MercatoServer/ and MercatoClient/)
+## =========================================================================
+.env
+.env.*
+!.env.example
+
+*.pem
+*.key
+*.pfx
+*.p12
+*.crt
+id_rsa
+id_rsa.pub
+service-account*.json
+*.credentials.json
+.aws/
+.azure/
+.npmrc
+
+# ASP.NET Core: appsettings*.json is committed by convention (no secrets should
+# live in it — use `dotnet user-secrets` or environment variables instead).
+# If a local override ever needs real secrets, name it appsettings.*.local.json
+# and it will be ignored automatically.
+appsettings.*.local.json
+secrets.json
+
+# NOTE (Vite/MercatoClient): any .env variable prefixed VITE_ gets inlined into
+# the public JS bundle at build time. Never put real API keys/secrets behind a
+# VITE_ prefix — gitignore-ing .env does not help once it's already built in.
+
+## =========================================================================
+## IDE / OS junk (repo-wide)
+## =========================================================================
+# Visual Studio
+.vs/
+*.vspscc
+*.vssscc
+
+# VS Code — keep shared settings, ignore personal/workspace clutter
+.vscode/*
+!.vscode/settings.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# JetBrains Rider
+.idea/
+*.sln.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+## =========================================================================
+## MercatoServer/ — .NET 10 backend (EF Core, Aspire, Hangfire, Testcontainers)
+## =========================================================================
+bin/
+obj/
+publish/
+artifacts/
+*.binlog
+*.buildlog
+*.pidb
+*.svclog
+*.log
+
+# Test / coverage
+TestResults/
+[Tt]est[Rr]esult*/
+coverage/
+*.coverage
+*.coveragexml
+*.trx
+
+# user-specific project files
+*.csproj.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Aspire / Docker local data
+.containers/
+**/AppHost/bin/
+**/AppHost/obj/
+docker/data/
+*.db
+*.sqlite
+
+## =========================================================================
+## MercatoClient/ — React + TypeScript + Vite frontend (npm)
+## =========================================================================
+node_modules/
+dist/
+dist-ssr/
+coverage/
+.vite/
+.eslintcache
+*.tsbuildinfo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+*.local
