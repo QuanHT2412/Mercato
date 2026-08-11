@@ -1,0 +1,9 @@
+<Project>
+
+  <!-- Repo-wide convention (CLAUDE.md section 9): nullable reference types + warnings as errors. -->
+  <PropertyGroup>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+</Project>
