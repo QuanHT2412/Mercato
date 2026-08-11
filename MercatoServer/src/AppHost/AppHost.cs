@@ -1,6 +1,12 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
-var postgres = builder.AddPostgres("postgres")
+// Secret parameters — resolved from User Secrets in Development (see README "Setup").
+// Never hardcoded, never committed.
+var postgresPassword = builder.AddParameter("postgres-password", secret: true);
+var rabbitmqPassword = builder.AddParameter("rabbitmq-password", secret: true);
+var redisPassword = builder.AddParameter("redis-password", secret: true);
+
+var postgres = builder.AddPostgres("postgres", password: postgresPassword)
     .WithDataVolume();
 
 var identityDb = postgres.AddDatabase("identity-db", "identity_db");
@@ -9,11 +15,11 @@ var orderingDb = postgres.AddDatabase("ordering-db", "ordering_db");
 
 // Wired now so the container is visible on the dashboard from M1; no service consumes it
 // yet — that starts in M5 (outbox dispatcher + consumers).
-builder.AddRabbitMQ("rabbitmq")
+builder.AddRabbitMQ("rabbitmq", password: rabbitmqPassword)
     .WithManagementPlugin()
     .WithDataVolume();
 
-var redis = builder.AddRedis("redis")
+var redis = builder.AddRedis("redis", password: redisPassword)
     .WithDataVolume();
 
 var identityApi = builder.AddProject<Projects.Mercato_Identity_Api>("identity-api")
