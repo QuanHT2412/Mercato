@@ -2,6 +2,13 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\ServiceDefaults\Mercato.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\Mercato.Identity.Application\Mercato.Identity.Application.csproj" />
+    <ProjectReference Include="..\Mercato.Identity.Infrastructure\Mercato.Identity.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Riok.Mapperly" Version="4.3.1" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="10.2.3" />
   </ItemGroup>
 
   <PropertyGroup>

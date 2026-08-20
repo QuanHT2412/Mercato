@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\Mercato.Identity.Domain\Mercato.Identity.Domain.csproj" />
+    <ProjectReference Include="..\Mercato.Identity.Application\Mercato.Identity.Application.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="13.4.6" />
+    <!-- Pinned to 10.0.8, not the newest 10.0.11: Aspire.Npgsql.EntityFrameworkCore.PostgreSQL
+         13.4.6 (net10.0 group) pulls Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore
+         10.0.8, which floors Microsoft.EntityFrameworkCore at 10.0.8 across the graph. Matching
+         Design to that avoids a compile-time (10.0.11) vs. resolved-runtime (10.0.8) mismatch. -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.8">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.22.0" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>

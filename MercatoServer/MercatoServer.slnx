@@ -15,8 +15,14 @@
   </Folder>
   <Folder Name="/src/Services/Identity/">
     <Project Path="src/Services/Identity/Mercato.Identity.Api/Mercato.Identity.Api.csproj" />
+    <Project Path="src/Services/Identity/Mercato.Identity.Application/Mercato.Identity.Application.csproj" />
+    <Project Path="src/Services/Identity/Mercato.Identity.Domain/Mercato.Identity.Domain.csproj" />
   </Folder>
   <Folder Name="/src/Services/Ordering/">
     <Project Path="src/Services/Ordering/Mercato.Ordering.Api/Mercato.Ordering.Api.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Identity.IntegrationTests/Identity.IntegrationTests.csproj" />
+    <Project Path="tests/Identity.Tests/Identity.Tests.csproj" />
   </Folder>
 </Solution>
