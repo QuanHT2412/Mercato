@@ -1,18 +1,27 @@
+using System.Net;
 using Mercato.Identity.Application.Abstractions;
 using Mercato.Identity.Application.Exceptions;
+using Mercato.Identity.Domain.Tokens;
 using Mercato.Identity.Domain.Users;
 using Microsoft.AspNetCore.Identity;
 
 namespace Mercato.Identity.Application.Users;
 
-public sealed record LoginUserCommand(string Email, string Password);
+public sealed record LoginUserCommand(string Email, string Password, string? DeviceInfo, IPAddress? IpAddress);
 
-public sealed record LoginUserResult(string AccessToken, DateTimeOffset ExpiresAt);
+public sealed record LoginUserResult(
+    string AccessToken,
+    DateTimeOffset AccessTokenExpiresAt,
+    string RefreshToken,
+    DateTimeOffset RefreshTokenExpiresAt);
 
 public sealed class LoginUserHandler(
     IUserRepository userRepository,
+    IRefreshTokenRepository refreshTokenRepository,
     IPasswordHasher<User> passwordHasher,
-    IAccessTokenGenerator accessTokenGenerator)
+    IAccessTokenGenerator accessTokenGenerator,
+    IRefreshTokenGenerator refreshTokenGenerator,
+    TimeProvider timeProvider)
 {
     public async Task<LoginUserResult> HandleAsync(LoginUserCommand command, CancellationToken cancellationToken)
     {
@@ -32,8 +41,23 @@ public sealed class LoginUserHandler(
             throw new InvalidCredentialsException();
         }
 
-        var token = accessTokenGenerator.Generate(user);
+        var accessToken = accessTokenGenerator.Generate(user);
 
-        return new LoginUserResult(token.Value, token.ExpiresAt);
+        var generatedRefreshToken = refreshTokenGenerator.Generate();
+        var refreshToken = RefreshToken.StartNewFamily(
+            user.Id,
+            generatedRefreshToken.TokenHash,
+            command.DeviceInfo,
+            command.IpAddress,
+            timeProvider);
+
+        refreshTokenRepository.Add(refreshToken);
+        await refreshTokenRepository.SaveChangesAsync(cancellationToken);
+
+        return new LoginUserResult(
+            accessToken.Value,
+            accessToken.ExpiresAt,
+            generatedRefreshToken.RawToken,
+            refreshToken.ExpiresAt);
     }
 }

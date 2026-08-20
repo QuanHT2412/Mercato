@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.Testing" Version="13.4.6" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.9.0" />
     <PackageReference Include="xunit.v3" Version="4.0.0" />
     <PackageReference Include="xunit.runner.visualstudio" Version="4.0.0" />
@@ -22,6 +23,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Services\Identity\Mercato.Identity.Api\Mercato.Identity.Api.csproj" />
+    <!-- Aliased: both this and Mercato.Identity.Api generate a top-level `Program` type,
+         which collide unqualified. -->
+    <ProjectReference Include="..\..\src\AppHost\Mercato.AppHost.csproj" Aliases="AppHostAssembly" />
   </ItemGroup>
 
 </Project>

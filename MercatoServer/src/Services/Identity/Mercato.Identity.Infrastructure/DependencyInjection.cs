@@ -16,9 +16,12 @@ public static class DependencyInjection
 
         builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(JwtOptions.SectionName));
 
+        builder.Services.AddSingleton(TimeProvider.System);
         builder.Services.AddScoped<IUserRepository, UserRepository>();
+        builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
         builder.Services.AddSingleton<IPasswordHasher<User>, PasswordHasher<User>>();
         builder.Services.AddSingleton<IAccessTokenGenerator, JwtAccessTokenGenerator>();
+        builder.Services.AddSingleton<IRefreshTokenGenerator, RefreshTokenGenerator>();
 
         return builder;
     }

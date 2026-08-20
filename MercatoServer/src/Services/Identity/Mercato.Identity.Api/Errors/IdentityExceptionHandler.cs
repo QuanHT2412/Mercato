@@ -18,6 +18,7 @@ internal sealed class IdentityExceptionHandler(IProblemDetailsService problemDet
             EmailAlreadyExistsException => (StatusCodes.Status409Conflict, "Email already registered"),
             UsernameAlreadyExistsException => (StatusCodes.Status409Conflict, "Username already taken"),
             InvalidCredentialsException => (StatusCodes.Status401Unauthorized, "Invalid credentials"),
+            InvalidRefreshTokenException => (StatusCodes.Status401Unauthorized, "Invalid credentials"),
             DomainValidationException => (StatusCodes.Status400BadRequest, "Invalid request"),
             _ => (0, string.Empty),
         };

@@ -1,3 +1,4 @@
+using Mercato.Identity.Api.Auth;
 using Mercato.Identity.Api.Endpoints;
 using Mercato.Identity.Api.Errors;
 using Microsoft.OpenApi;
@@ -12,6 +13,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.AddServiceDefaults();
 builder.AddIdentityInfrastructure();
 builder.Services.AddIdentityApplication();
+builder.Services.Configure<AuthCookieOptions>(builder.Configuration.GetSection(AuthCookieOptions.SectionName));
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>

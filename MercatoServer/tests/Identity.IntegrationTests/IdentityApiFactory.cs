@@ -27,6 +27,13 @@ public sealed class IdentityApiFactory : WebApplicationFactory<Program>, IAsyncL
         Environment.SetEnvironmentVariable("Jwt__PrivateKey", privateKeyPem);
         Environment.SetEnvironmentVariable("Jwt__Issuer", "mercato-identity-tests");
         Environment.SetEnvironmentVariable("Jwt__Audience", "mercato-tests");
+
+        // Force host creation (and the one-time EF migration it runs) here, while
+        // nothing else is running yet. Test methods in the same class run in parallel
+        // by default and each calls CreateClient(); without this, two of them can race
+        // to build the (lazily-created, cached) host and both try to migrate the same
+        // database at once — "relation already exists".
+        using var _ = CreateClient();
     }
 
     public override async ValueTask DisposeAsync()

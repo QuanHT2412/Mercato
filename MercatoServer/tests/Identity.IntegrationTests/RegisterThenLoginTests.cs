@@ -26,7 +26,7 @@ public class RegisterThenLoginTests(IdentityApiFactory factory) : IClassFixture<
             cancellationToken);
 
         Assert.Equal(HttpStatusCode.OK, loginResponse.StatusCode);
-        var login = await loginResponse.Content.ReadFromJsonAsync<LoginResponse>(cancellationToken);
+        var login = await loginResponse.Content.ReadFromJsonAsync<AccessTokenResponse>(cancellationToken);
         Assert.NotNull(login);
         Assert.False(string.IsNullOrWhiteSpace(login.AccessToken));
         Assert.True(login.ExpiresAt > DateTimeOffset.UtcNow);

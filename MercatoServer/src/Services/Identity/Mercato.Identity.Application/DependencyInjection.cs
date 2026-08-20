@@ -1,3 +1,4 @@
+using Mercato.Identity.Application.Tokens;
 using Mercato.Identity.Application.Users;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -9,6 +10,8 @@ public static class DependencyInjection
     {
         services.AddScoped<RegisterUserHandler>();
         services.AddScoped<LoginUserHandler>();
+        services.AddScoped<RefreshAccessTokenHandler>();
+        services.AddScoped<LogoutHandler>();
 
         return services;
     }

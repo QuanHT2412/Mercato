@@ -1,6 +1,6 @@
 -- ============================================================================
 -- MERCATO — Schema v2, database-per-service
--- Ba database vật lý riêng: identity_db, catalog_db, ordering_db.
+-- Ba database riêng: identity_db, catalog_db, ordering_db.
 -- KHÔNG có FK xuyên service: user_id/variant_id tại ranh giới là UUID trần,
 -- integrity đảm bảo bằng application logic + events (ADR: cross-service integrity).
 -- Lưu ý: đây là bản tham chiếu thiết kế — implement thật đi qua EF Core
@@ -43,17 +43,22 @@ CREATE TABLE user_roles (
 
 -- Refresh token theo RFC 9700: LƯU HASH (không plaintext), rotation theo family.
 -- Reuse detection: token đã revoked/replaced mà xuất hiện lại -> revoke cả family_id.
+-- rotated_at/family_expires_at: bổ sung ở M2 slice 2 (ADR 0002 "Lifetimes" +
+-- "Rotation race handling") — không có trong bản schema gốc.
 CREATE TABLE refresh_tokens (
-    id          UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id     UUID        NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    token_hash  TEXT        NOT NULL UNIQUE,      -- SHA-256 của token
-    family_id   UUID        NOT NULL,             -- chuỗi rotation cùng 1 phiên đăng nhập
-    replaced_by UUID,                             -- token kế nhiệm trong family (NULL = mới nhất)
-    device_info TEXT,
-    ip_address  INET,
-    is_revoked  BOOLEAN     NOT NULL DEFAULT FALSE,
-    expires_at  TIMESTAMPTZ NOT NULL,
-    created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    id                 UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id            UUID        NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    token_hash         TEXT        NOT NULL UNIQUE,      -- SHA-256 của token
+    family_id          UUID        NOT NULL,             -- chuỗi rotation cùng 1 phiên đăng nhập
+    replaced_by        UUID,                             -- token kế nhiệm trong family (NULL = mới nhất)
+    device_info        TEXT,
+    ip_address         INET,
+    is_revoked         BOOLEAN     NOT NULL DEFAULT FALSE,
+    expires_at         TIMESTAMPTZ NOT NULL,
+    created_at         TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    rotated_at         TIMESTAMPTZ,                      -- set khi token này bị thay thế; NULL = vẫn hiện hành
+    family_expires_at  TIMESTAMPTZ NOT NULL              -- absolute cap 30 ngày, cố định lúc tạo family,
+                                                          -- copy nguyên mỗi lần rotate — không bao giờ gia hạn
 );
 
 CREATE INDEX idx_refresh_tokens_family ON refresh_tokens (family_id);
@@ -253,15 +258,3 @@ CREATE TABLE inbox_messages (
     processed_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- ============================================================================
--- ĐÃ CẮT so với v1 (có chủ đích, khớp brief — ứng viên phase 2):
---   social.reviews                      -> phase 2 (brief section 7)
---   shop.stores + store_id khắp nơi     -> multi-vendor ngoài scope
---   ordering.wallets + wallet_tx        -> hệ ví ngoài scope, mock payment là đủ
---   auth.oauth_accounts                 -> OAuth ngoài scope
---   auth.permissions/role_permissions   -> RBAC 2 role qua claims là đủ
---   auth.blacklisted_tokens             -> access token ngắn hạn + rotation thay thế
---   shop.customer_profiles/addresses    -> địa chỉ snapshot thẳng vào order (v1);
---                                          address book là tính năng phase 2
---   ordering.payment_methods            -> 1 mock provider, cột method_code là đủ
--- ============================================================================
