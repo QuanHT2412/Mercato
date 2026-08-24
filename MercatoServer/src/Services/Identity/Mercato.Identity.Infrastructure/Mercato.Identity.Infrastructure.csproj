@@ -6,9 +6,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="13.4.6" />
+    <PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="13.6.5" />
     <!-- Pinned to 10.0.8, not the newest 10.0.11: Aspire.Npgsql.EntityFrameworkCore.PostgreSQL
-         13.4.6 (net10.0 group) pulls Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore
+         13.6.5 (net10.0 group) pulls Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore
          10.0.8, which floors Microsoft.EntityFrameworkCore at 10.0.8 across the graph. Matching
          Design to that avoids a compile-time (10.0.11) vs. resolved-runtime (10.0.8) mismatch. -->
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.8">

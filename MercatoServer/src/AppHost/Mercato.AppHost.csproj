@@ -1,4 +1,4 @@
-<Project Sdk="Aspire.AppHost.Sdk/13.4.6">
+<Project Sdk="Aspire.AppHost.Sdk/13.6.5">
 
   <ItemGroup>
     <ProjectReference Include="..\Services\Identity\Mercato.Identity.Api\Mercato.Identity.Api.csproj" />
@@ -8,9 +8,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Aspire.Hosting.PostgreSQL" Version="13.4.6" />
-    <PackageReference Include="Aspire.Hosting.RabbitMQ" Version="13.4.6" />
-    <PackageReference Include="Aspire.Hosting.Redis" Version="13.4.6" />
+    <PackageReference Include="Aspire.Hosting.PostgreSQL" Version="13.6.5" />
+    <PackageReference Include="Aspire.Hosting.RabbitMQ" Version="13.6.5" />
+    <PackageReference Include="Aspire.Hosting.Redis" Version="13.6.5" />
   </ItemGroup>
 
   <PropertyGroup>
@@ -19,6 +19,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <UserSecretsId>4177c353-c71e-4651-bb9f-680199eb001d</UserSecretsId>
+    <!-- The Aspire CLI bundle is optional; this AppHost is started with plain `dotnet run`. -->
+    <NoWarn>$(NoWarn);ASPIRE010</NoWarn>
   </PropertyGroup>
 
 </Project>
