@@ -106,6 +106,21 @@ public class RefreshTokenTests
     }
 
     [Fact]
+    public void IsWithinRotationGrace_FalseBeforeRotation_TrueJustAfter_FalseOnceTheWindowCloses()
+    {
+        var timeProvider = new FakeTimeProvider(DateTimeOffset.UtcNow);
+        var token = RefreshToken.StartNewFamily(UserId, "hash-1", null, null, timeProvider);
+        Assert.False(token.IsWithinRotationGrace(timeProvider));
+
+        token.Rotate("hash-2", null, null, timeProvider);
+        timeProvider.Advance(RefreshToken.RotationGraceWindow - TimeSpan.FromSeconds(1));
+        Assert.True(token.IsWithinRotationGrace(timeProvider));
+
+        timeProvider.Advance(TimeSpan.FromSeconds(1));
+        Assert.False(token.IsWithinRotationGrace(timeProvider));
+    }
+
+    [Fact]
     public void Revoke_SetsIsRevoked()
     {
         var timeProvider = new FakeTimeProvider(DateTimeOffset.UtcNow);

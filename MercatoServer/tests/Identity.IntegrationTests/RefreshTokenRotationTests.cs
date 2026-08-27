@@ -32,10 +32,14 @@ public class RefreshTokenRotationTests(IdentityApiFactory factory) : IClassFixtu
         var thirdCookie = ExtractCookieValue(refresh2);
         Assert.NotEqual(secondCookie, thirdCookie);
 
-        // Reusing the FIRST (already-rotated) token: flat 401 is the slice-2 behavior —
-        // slice 3 replaces this with grace-window/reuse-detection.
-        var reuseFirst = await PostWithCookieAsync(client, "/refresh", firstCookie, ct);
-        Assert.Equal(HttpStatusCode.Unauthorized, reuseFirst.StatusCode);
+        // Replaying the SECOND token milliseconds after it was rotated is the benign
+        // two-tabs race (ADR 0002 grace window): a fresh access token, but no new
+        // refresh cookie and no family revocation — the third token stays usable below.
+        // The theft case (same replay after the window → family revoked) needs time
+        // travel, so it is covered by RefreshAccessTokenHandlerTests with a fake clock.
+        var replaySecond = await PostWithCookieAsync(client, "/refresh", secondCookie, ct);
+        Assert.Equal(HttpStatusCode.OK, replaySecond.StatusCode);
+        Assert.False(replaySecond.Headers.Contains("Set-Cookie"));
 
         var logout = await PostWithCookieAsync(client, "/logout", thirdCookie, ct);
         Assert.Equal(HttpStatusCode.NoContent, logout.StatusCode);

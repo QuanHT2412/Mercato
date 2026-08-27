@@ -88,7 +88,12 @@ public static class AuthEndpoints
             var command = new RefreshAccessTokenCommand(rawToken, GetDeviceInfo(httpContext), GetIpAddress(httpContext));
             var result = await handler.HandleAsync(command, cancellationToken);
 
-            RefreshTokenCookie.Set(httpContext.Response, result.RefreshToken, result.RefreshTokenExpiresAt, cookieOptions);
+            // Null inside the rotation grace window: the cookie already holds the
+            // successor issued to the request that won the race — leave it alone.
+            if (result.RefreshToken is not null && result.RefreshTokenExpiresAt is not null)
+            {
+                RefreshTokenCookie.Set(httpContext.Response, result.RefreshToken, result.RefreshTokenExpiresAt.Value, cookieOptions);
+            }
 
             return Results.Ok(result.ToResponse());
         }

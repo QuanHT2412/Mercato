@@ -1,4 +1,5 @@
 using Mercato.Identity.Application.Abstractions;
+using Mercato.Identity.Application.Exceptions;
 using Mercato.Identity.Domain.Tokens;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,6 +17,15 @@ internal sealed class RefreshTokenRepository(IdentityDbContext dbContext) : IRef
             .Where(t => t.FamilyId == familyId && !t.IsRevoked)
             .ExecuteUpdateAsync(setters => setters.SetProperty(t => t.IsRevoked, true), cancellationToken);
 
-    public Task SaveChangesAsync(CancellationToken cancellationToken) =>
-        dbContext.SaveChangesAsync(cancellationToken);
+    public async Task SaveChangesAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            await dbContext.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            throw new RefreshTokenRotationConflictException();
+        }
+    }
 }

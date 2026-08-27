@@ -8,6 +8,10 @@ public sealed class RefreshToken
     public static readonly TimeSpan IdleLifetime = TimeSpan.FromDays(7);
     public static readonly TimeSpan FamilyLifetime = TimeSpan.FromDays(30);
 
+    // ADR 0002 "Rotation race handling": a rotated token seen again inside this window is
+    // a benign race (two tabs sharing one cookie), outside it is treated as theft.
+    public static readonly TimeSpan RotationGraceWindow = TimeSpan.FromSeconds(30);
+
     public Guid Id { get; private set; }
     public Guid UserId { get; private set; }
     public string TokenHash { get; private set; }
@@ -105,6 +109,9 @@ public sealed class RefreshToken
     public void Revoke() => IsRevoked = true;
 
     public bool IsRotated => ReplacedBy is not null;
+
+    public bool IsWithinRotationGrace(TimeProvider timeProvider) =>
+        RotatedAt is { } rotatedAt && timeProvider.GetUtcNow() < rotatedAt + RotationGraceWindow;
 
     public bool IsExpired(TimeProvider timeProvider) => timeProvider.GetUtcNow() >= ExpiresAt;
 

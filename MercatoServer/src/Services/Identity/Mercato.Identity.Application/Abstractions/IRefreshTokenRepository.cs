@@ -12,5 +12,7 @@ public interface IRefreshTokenRepository
     // RefreshToken has no notion of its siblings, so this can't be a domain method.
     Task RevokeFamilyAsync(Guid familyId, CancellationToken cancellationToken);
 
+    // Throws RefreshTokenRotationConflictException when a tracked token row was changed
+    // by someone else since it was read (optimistic concurrency).
     Task SaveChangesAsync(CancellationToken cancellationToken);
 }

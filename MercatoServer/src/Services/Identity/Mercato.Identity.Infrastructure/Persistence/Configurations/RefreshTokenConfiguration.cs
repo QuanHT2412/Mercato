@@ -26,6 +26,11 @@ internal sealed class RefreshTokenConfiguration : IEntityTypeConfiguration<Refre
         builder.Property(t => t.RotatedAt).HasColumnName("rotated_at");
         builder.Property(t => t.FamilyExpiresAt).HasColumnName("family_expires_at").IsRequired();
 
+        // Postgres' xmin system column as an optimistic concurrency token: two requests
+        // rotating the same token both read "not rotated yet", but only the first UPDATE
+        // matches the xmin it read — the second fails instead of minting a second successor.
+        builder.Property<uint>("Version").IsRowVersion();
+
         builder.HasIndex(t => t.TokenHash).IsUnique();
         builder.HasIndex(t => t.FamilyId).HasDatabaseName("idx_refresh_tokens_family");
         builder.HasIndex(t => new { t.UserId, t.ExpiresAt })
