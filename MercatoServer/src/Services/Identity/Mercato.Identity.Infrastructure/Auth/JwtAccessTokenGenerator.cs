@@ -38,6 +38,10 @@ internal sealed class JwtAccessTokenGenerator : IAccessTokenGenerator, IDisposab
             new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new Claim(JwtRegisteredClaimNames.Email, user.Email),
             new Claim(JwtRegisteredClaimNames.Name, user.Name),
+            // Short claim name on purpose ("role", not the long ClaimTypes.Role URI): the
+            // validators set RoleClaimType = "role" (see ServiceDefaults), and the token
+            // rides on every request so it should stay small.
+            new Claim("role", user.Role.ToString()),
         };
 
         var token = new JwtSecurityToken(

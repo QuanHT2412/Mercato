@@ -1,3 +1,4 @@
+using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Net.Http.Json;
 using Mercato.Identity.Api.Contracts;
@@ -30,6 +31,11 @@ public class RegisterThenLoginTests(IdentityApiFactory factory) : IClassFixture<
         Assert.NotNull(login);
         Assert.False(string.IsNullOrWhiteSpace(login.AccessToken));
         Assert.True(login.ExpiresAt > DateTimeOffset.UtcNow);
+
+        // RBAC travels in the token: a self-registered account is always a Customer.
+        var jwt = new JwtSecurityTokenHandler().ReadJwtToken(login.AccessToken);
+        Assert.Equal("Customer", jwt.Claims.Single(c => c.Type == "role").Value);
+        Assert.Equal(registered.Id.ToString(), jwt.Subject);
     }
 
     [Fact]

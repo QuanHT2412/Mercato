@@ -17,6 +17,17 @@ public class UserTests
         Assert.True(user.IsActive);
         Assert.False(user.IsVerified);
         Assert.Null(user.AvatarUrl);
+        Assert.Equal(UserRole.Customer, user.Role);
+    }
+
+    [Fact]
+    public void CreateAdmin_AssignsTheAdminRole_AndAppliesTheSameValidation()
+    {
+        var admin = User.CreateAdmin("admin@example.com", "admin", "hashed-password", "Store Admin");
+
+        Assert.Equal(UserRole.Admin, admin.Role);
+        Assert.Throws<DomainValidationException>(() =>
+            User.CreateAdmin("not-an-email", "admin", "hashed-password", "Store Admin"));
     }
 
     [Theory]

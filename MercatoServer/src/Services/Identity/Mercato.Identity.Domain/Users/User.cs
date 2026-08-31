@@ -10,6 +10,7 @@ public sealed class User
     public string PasswordHash { get; private set; }
     public string Name { get; private set; }
     public string? AvatarUrl { get; private set; }
+    public UserRole Role { get; private set; }
     public bool IsActive { get; private set; }
     public bool IsVerified { get; private set; }
     public DateTimeOffset CreatedAt { get; private set; }
@@ -24,20 +25,29 @@ public sealed class User
         Name = null!;
     }
 
-    private User(Guid id, string email, string username, string passwordHash, string name)
+    private User(Guid id, string email, string username, string passwordHash, string name, UserRole role)
     {
         Id = id;
         Email = email;
         Username = username;
         PasswordHash = passwordHash;
         Name = name;
+        Role = role;
         IsActive = true;
         IsVerified = false;
         CreatedAt = DateTimeOffset.UtcNow;
         UpdatedAt = CreatedAt;
     }
 
-    public static User Register(string email, string username, string passwordHash, string name)
+    // Public registration always creates a Customer; Admin accounts only come from
+    // seeding (see AdminSeeder) — there is no endpoint that lets a caller pick a role.
+    public static User Register(string email, string username, string passwordHash, string name) =>
+        Create(email, username, passwordHash, name, UserRole.Customer);
+
+    public static User CreateAdmin(string email, string username, string passwordHash, string name) =>
+        Create(email, username, passwordHash, name, UserRole.Admin);
+
+    private static User Create(string email, string username, string passwordHash, string name, UserRole role)
     {
         if (string.IsNullOrWhiteSpace(passwordHash))
         {
@@ -49,7 +59,8 @@ public sealed class User
             ValidateEmail(email),
             ValidateUsername(username),
             passwordHash,
-            ValidateName(name));
+            ValidateName(name),
+            role);
     }
 
     // Never hard-deleted (ADR 0001): a user is deactivated, historical references
