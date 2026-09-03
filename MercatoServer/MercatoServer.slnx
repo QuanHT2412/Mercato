@@ -17,6 +17,7 @@
     <Project Path="src/Services/Identity/Mercato.Identity.Api/Mercato.Identity.Api.csproj" />
     <Project Path="src/Services/Identity/Mercato.Identity.Application/Mercato.Identity.Application.csproj" />
     <Project Path="src/Services/Identity/Mercato.Identity.Domain/Mercato.Identity.Domain.csproj" />
+    <Project Path="src/Services/Identity/Mercato.Identity.Infrastructure/Mercato.Identity.Infrastructure.csproj" />
   </Folder>
   <Folder Name="/src/Services/Ordering/">
     <Project Path="src/Services/Ordering/Mercato.Ordering.Api/Mercato.Ordering.Api.csproj" />

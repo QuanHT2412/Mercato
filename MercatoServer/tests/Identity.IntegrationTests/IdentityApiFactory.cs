@@ -22,9 +22,10 @@ public sealed class IdentityApiFactory : WebApplicationFactory<Program>, IAsyncL
         // environment variables before the host builds is the most reliable way to
         // feed it a connection string/keys — this is also how Aspire really does it
         // (env vars from AppHost), so the test mirrors production wiring.
-        var (privateKeyPem, _) = GenerateEcKeyPair();
+        var (privateKeyPem, publicKeyPem) = GenerateEcKeyPair();
         Environment.SetEnvironmentVariable("ConnectionStrings__identity-db", _postgres.GetConnectionString());
         Environment.SetEnvironmentVariable("Jwt__PrivateKey", privateKeyPem);
+        Environment.SetEnvironmentVariable("Jwt__PublicKey", publicKeyPem);
         Environment.SetEnvironmentVariable("Jwt__Issuer", "mercato-identity-tests");
         Environment.SetEnvironmentVariable("Jwt__Audience", "mercato-tests");
 
