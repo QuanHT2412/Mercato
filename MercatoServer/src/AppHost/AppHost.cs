@@ -46,6 +46,15 @@ var orderingApi = builder.AddProject<Projects.Mercato_Ordering_Api>("ordering-ap
     .WaitFor(orderingDb)
     .WithEnvironment("Jwt__PublicKey", jwtPublicKey);
 
+// Optional: without it Identity simply does not seed an admin account. Read straight
+// from configuration (not AddParameter) so a missing value is not a startup failure.
+var adminPassword = builder.Configuration["Parameters:admin-password"];
+
+if (!string.IsNullOrWhiteSpace(adminPassword))
+{
+    identityApi.WithEnvironment("Seed__AdminPassword", adminPassword);
+}
+
 builder.AddProject<Projects.Mercato_Gateway>("gateway")
     .WithReference(identityApi)
     .WithReference(catalogApi)

@@ -7,6 +7,11 @@ namespace Identity.IntegrationTests;
 
 public sealed class IdentityApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
+    // Throwaway credentials for the admin the app seeds at startup — they only ever exist
+    // inside this test's disposable Postgres container.
+    public const string AdminEmail = "admin@mercato.test";
+    public const string AdminPassword = "integration-test-admin-pw";
+
     private readonly PostgreSqlContainer _postgres = new PostgreSqlBuilder("postgres:18.3").Build();
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -28,6 +33,8 @@ public sealed class IdentityApiFactory : WebApplicationFactory<Program>, IAsyncL
         Environment.SetEnvironmentVariable("Jwt__PublicKey", publicKeyPem);
         Environment.SetEnvironmentVariable("Jwt__Issuer", "mercato-identity-tests");
         Environment.SetEnvironmentVariable("Jwt__Audience", "mercato-tests");
+        Environment.SetEnvironmentVariable("Seed__AdminEmail", AdminEmail);
+        Environment.SetEnvironmentVariable("Seed__AdminPassword", AdminPassword);
 
         // Force host creation (and the one-time EF migration it runs) here, while
         // nothing else is running yet. Test methods in the same class run in parallel

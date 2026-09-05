@@ -1,4 +1,5 @@
 using System.Net;
+using System.Security.Claims;
 using Mercato.Identity.Api.Auth;
 using Mercato.Identity.Api.Contracts;
 using Mercato.Identity.Api.Mapping;
@@ -41,7 +42,32 @@ public static class AuthEndpoints
             .WithSummary("Revoke the current refresh token family and clear the cookie")
             .Produces(StatusCodes.Status204NoContent);
 
+        app.MapGet("/me", GetCurrentUserAsync)
+            .RequireAuthorization()
+            .WithName("GetCurrentUser")
+            .WithTags("Auth")
+            .WithSummary("Profile of the caller identified by the bearer access token")
+            .Produces<CurrentUserResponse>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status401Unauthorized);
+
         return app;
+    }
+
+    private static async Task<IResult> GetCurrentUserAsync(
+        ClaimsPrincipal principal,
+        GetCurrentUserHandler handler,
+        CancellationToken cancellationToken)
+    {
+        // A valid signature with an unusable subject, or a user deactivated since the
+        // token was issued, is still "not authenticated" from the caller's side.
+        if (!Guid.TryParse(principal.FindFirstValue(JwtValidationExtensions.SubjectClaim), out var userId))
+        {
+            return Results.Unauthorized();
+        }
+
+        var result = await handler.HandleAsync(userId, cancellationToken);
+
+        return result is null ? Results.Unauthorized() : Results.Ok(result.ToResponse());
     }
 
     private static async Task<IResult> RegisterAsync(

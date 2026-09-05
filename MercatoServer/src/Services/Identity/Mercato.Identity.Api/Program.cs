@@ -5,8 +5,6 @@ using Microsoft.OpenApi;
 using Mercato.Identity.Application;
 using Mercato.Identity.Application.Abstractions;
 using Mercato.Identity.Infrastructure;
-using Mercato.Identity.Infrastructure.Persistence;
-using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,10 +35,7 @@ app.Services.GetRequiredService<IAccessTokenGenerator>();
 
 if (app.Environment.IsDevelopment())
 {
-    using (var scope = app.Services.CreateScope())
-    {
-        await scope.ServiceProvider.GetRequiredService<IdentityDbContext>().Database.MigrateAsync();
-    }
+    await app.Services.InitializeIdentityDatabaseAsync();
 
     app.UseSwagger();
     app.UseSwaggerUI();

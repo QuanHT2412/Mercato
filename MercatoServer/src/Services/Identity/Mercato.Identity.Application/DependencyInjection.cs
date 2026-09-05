@@ -12,6 +12,7 @@ public static class DependencyInjection
         services.AddScoped<LoginUserHandler>();
         services.AddScoped<RefreshAccessTokenHandler>();
         services.AddScoped<LogoutHandler>();
+        services.AddScoped<GetCurrentUserHandler>();
 
         return services;
     }

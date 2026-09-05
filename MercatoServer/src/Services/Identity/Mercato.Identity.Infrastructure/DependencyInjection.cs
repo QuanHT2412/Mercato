@@ -2,7 +2,9 @@ using Mercato.Identity.Application.Abstractions;
 using Mercato.Identity.Domain.Users;
 using Mercato.Identity.Infrastructure.Auth;
 using Mercato.Identity.Infrastructure.Persistence;
+using Mercato.Identity.Infrastructure.Seeding;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -23,6 +25,18 @@ public static class DependencyInjection
         builder.Services.AddSingleton<IAccessTokenGenerator, JwtAccessTokenGenerator>();
         builder.Services.AddSingleton<IRefreshTokenGenerator, RefreshTokenGenerator>();
 
+        builder.Services.Configure<AdminSeedOptions>(builder.Configuration.GetSection(AdminSeedOptions.SectionName));
+        builder.Services.AddScoped<AdminSeeder>();
+
         return builder;
+    }
+
+    // Applies pending migrations, then seeds the admin account if one is configured.
+    public static async Task InitializeIdentityDatabaseAsync(this IServiceProvider services, CancellationToken cancellationToken = default)
+    {
+        await using var scope = services.CreateAsyncScope();
+
+        await scope.ServiceProvider.GetRequiredService<IdentityDbContext>().Database.MigrateAsync(cancellationToken);
+        await scope.ServiceProvider.GetRequiredService<AdminSeeder>().SeedAsync(cancellationToken);
     }
 }

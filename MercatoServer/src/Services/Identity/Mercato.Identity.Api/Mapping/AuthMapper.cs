@@ -12,6 +12,8 @@ public static partial class AuthMapper
 
     public static partial RegisterResponse ToResponse(this RegisterUserResult result);
 
+    public static partial CurrentUserResponse ToResponse(this CurrentUserResult result);
+
     // LoginUserCommand/RefreshAccessTokenCommand also need DeviceInfo/IpAddress pulled
     // from HttpContext, not from the request body — endpoints construct those directly
     // rather than through a mapper.
