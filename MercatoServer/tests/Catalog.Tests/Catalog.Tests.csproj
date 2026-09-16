@@ -22,6 +22,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Services\Catalog\Mercato.Catalog.Domain\Mercato.Catalog.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Services\Catalog\Mercato.Catalog.Application\Mercato.Catalog.Application.csproj" />
   </ItemGroup>
 
 </Project>
