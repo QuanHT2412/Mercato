@@ -2,11 +2,14 @@ using Mercato.Catalog.Domain.Categories;
 using Mercato.Catalog.Domain.Products;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using NpgsqlTypes;
 
 namespace Mercato.Catalog.Infrastructure.Persistence.Configurations;
 
 internal sealed class ProductConfiguration : IEntityTypeConfiguration<Product>
 {
+    public const string SearchVectorProperty = "SearchVector";
+
     public void Configure(EntityTypeBuilder<Product> builder)
     {
         builder.ToTable("products");
@@ -20,6 +23,21 @@ internal sealed class ProductConfiguration : IEntityTypeConfiguration<Product>
         builder.Property(p => p.IsActive).HasColumnName("is_active").IsRequired();
         builder.Property(p => p.CreatedAt).HasColumnName("created_at").IsRequired();
         builder.Property(p => p.UpdatedAt).HasColumnName("updated_at").IsRequired();
+
+        // Full-text search (CLAUDE.md 3.2 — Postgres tsvector, not Elasticsearch). A STORED
+        // generated column: Postgres recomputes it on every write to name/description, so
+        // it can never drift from the row, and the GIN index makes @@ an index lookup.
+        // Shadow property — NpgsqlTsVector is an Npgsql type and the Domain project has
+        // zero package references, so the entity itself knows nothing about it.
+        // 'simple' config: no stemming/stop words, which suits Vietnamese product names;
+        // name outranks description (weights A/B).
+        builder.Property<NpgsqlTsVector>(SearchVectorProperty)
+            .HasColumnName("search_vector")
+            .HasComputedColumnSql(
+                "setweight(to_tsvector('simple', coalesce(name, '')), 'A') || " +
+                "setweight(to_tsvector('simple', coalesce(description, '')), 'B')",
+                stored: true);
+        builder.HasIndex(SearchVectorProperty).HasMethod("GIN").HasDatabaseName("idx_products_search");
 
         builder.HasIndex(p => p.CategoryId).HasDatabaseName("idx_products_category_id");
         builder.HasIndex(p => p.IsActive).HasDatabaseName("idx_products_active").HasFilter("is_active = true");
