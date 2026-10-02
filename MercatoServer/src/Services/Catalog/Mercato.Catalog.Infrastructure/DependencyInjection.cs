@@ -19,7 +19,11 @@ public static class DependencyInjection
         builder.Services.AddScoped<IProductRepository, ProductRepository>();
         builder.Services.AddScoped<IProductQueries, ProductQueries>();
         builder.Services.AddScoped<IStockStore, StockStore>();
-        builder.Services.AddSingleton<ICatalogCache, NoOpCatalogCache>();
+
+        // IConnectionMultiplexer from the Aspire Redis component ("redis" resource in the
+        // AppHost) — connection string, health check and tracing come with it.
+        builder.AddRedisClient("redis");
+        builder.Services.AddSingleton<ICatalogCache, RedisCatalogCache>();
 
         return builder;
     }
