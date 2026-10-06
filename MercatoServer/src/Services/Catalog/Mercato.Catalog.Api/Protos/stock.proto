@@ -1,0 +1,67 @@
+syntax = "proto3";
+
+option csharp_namespace = "Mercato.Catalog.Grpc";
+
+package mercato.catalog.v1;
+
+// Internal, synchronous contract between Ordering (client) and Catalog (server) — the
+// only sync call between services (CLAUDE.md section 5). Catalog owns this file; Ordering
+// compiles a client from the same file, so the two can never disagree on the shape.
+service StockService {
+  // Checks availability and holds the units for the order's payment window, atomically
+  // and all-or-nothing. Safe to retry: a repeat for the same order_id returns the
+  // existing hold instead of holding twice.
+  rpc CheckAndReserveStock (ReserveStockRequest) returns (ReserveStockReply);
+
+  // The order was paid: turn its hold into a real stock decrement. Idempotent.
+  rpc ConfirmReservation (ReservationRequest) returns (ReservationReply);
+
+  // The order was cancelled or expired: give the held units back. Idempotent.
+  rpc ReleaseReservation (ReservationRequest) returns (ReservationReply);
+}
+
+message ReserveStockRequest {
+  string order_id = 1;              // UUID
+  repeated StockLine lines = 2;
+  int32 hold_seconds = 3;           // how long to hold; the server clamps it
+}
+
+message StockLine {
+  string variant_id = 1;            // UUID
+  int32 quantity = 2;
+}
+
+// "Out of stock" is an expected outcome of a checkout, so it comes back as data
+// (reserved = false + reason) rather than as a gRPC error status. Error statuses are
+// kept for malformed requests and real failures.
+message ReserveStockReply {
+  bool reserved = 1;
+  repeated ReservedStockLine lines = 2;       // filled only when reserved
+  ReserveFailureReason failure_reason = 3;
+  string failed_variant_id = 4;
+  int32 available_quantity = 5;
+}
+
+// What Ordering snapshots onto the order at checkout.
+message ReservedStockLine {
+  string variant_id = 1;
+  string product_name = 2;
+  string variant_name = 3;
+  int64 unit_price = 4;             // VND has no minor unit, so a whole number is exact
+  int32 quantity = 5;
+}
+
+enum ReserveFailureReason {
+  RESERVE_FAILURE_REASON_UNSPECIFIED = 0;
+  RESERVE_FAILURE_REASON_VARIANT_NOT_FOUND = 1;
+  RESERVE_FAILURE_REASON_INSUFFICIENT_STOCK = 2;
+}
+
+message ReservationRequest {
+  string order_id = 1;
+}
+
+message ReservationReply {
+  // false = the order held nothing (already settled, or never reserved). Not an error.
+  bool found = 1;
+}

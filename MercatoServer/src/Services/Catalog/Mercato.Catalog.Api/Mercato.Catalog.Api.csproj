@@ -7,7 +7,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Grpc.AspNetCore" Version="2.85.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="10.2.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Both: the server base class for StockGrpcService, plus a client stub that the
+         integration tests use to call it. Ordering compiles its own client from this
+         same file (it does not reference this project). -->
+    <Protobuf Include="Protos\stock.proto" GrpcServices="Both" />
   </ItemGroup>
 
   <PropertyGroup>
