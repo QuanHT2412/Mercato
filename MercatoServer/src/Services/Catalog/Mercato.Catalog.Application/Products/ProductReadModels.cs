@@ -39,7 +39,10 @@ public sealed record ProductDetails(
         product.CreatedAt,
         product.UpdatedAt,
         [.. product.Variants
+            // Variants created together share a timestamp; SKU breaks the tie so the
+            // order is stable from one read to the next.
             .OrderBy(v => v.CreatedAt)
+            .ThenBy(v => v.Sku, StringComparer.Ordinal)
             .Select(v => new ProductVariantDetails(v.Id, v.Sku, v.Name, v.Price, v.Stock, v.ImageUrl, v.IsActive))]);
 }
 
