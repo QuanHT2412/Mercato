@@ -6,7 +6,8 @@ namespace Ordering.Tests.Domain;
 public class OrderTests
 {
     private static readonly DateTimeOffset Now = new(2026, 10, 15, 9, 0, 0, TimeSpan.Zero);
-    private static readonly ShippingDetails Shipping = new("Nguyen Van A", "0901234567", "12 Lê Lợi, Quận 1, TP.HCM", null);
+    private static readonly ShippingDetails Shipping =
+        ShippingDetails.Create("  Nguyen Van A ", "0901234567", "12 Lê Lợi, Quận 1, TP.HCM", "  ");
 
     private static readonly OrderLine[] Lines =
     [
@@ -52,10 +53,16 @@ public class OrderTests
     [InlineData("", "0901234567", "12 Lê Lợi")]
     [InlineData("Nguyen Van A", " ", "12 Lê Lợi")]
     [InlineData("Nguyen Van A", "0901234567", "")]
-    public void Place_WithIncompleteShippingDetails_Throws(string receiver, string phone, string address)
+    public void ShippingDetails_WithAMissingField_CannotBeCreated(string receiver, string phone, string address)
     {
-        Assert.Throws<DomainValidationException>(() =>
-            Order.Place(Order.NewId(), Guid.CreateVersion7(), new ShippingDetails(receiver, phone, address, null), Lines, Now));
+        Assert.Throws<DomainValidationException>(() => ShippingDetails.Create(receiver, phone, address, null));
+    }
+
+    [Fact]
+    public void ShippingDetails_AreTrimmed_AndABlankNoteBecomesNull()
+    {
+        Assert.Equal("Nguyen Van A", Shipping.Receiver);
+        Assert.Null(Shipping.Note);
     }
 
     [Fact]

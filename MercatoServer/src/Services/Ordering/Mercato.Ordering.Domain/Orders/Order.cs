@@ -2,7 +2,51 @@ using Mercato.Ordering.Domain.Exceptions;
 
 namespace Mercato.Ordering.Domain.Orders;
 
-public sealed record ShippingDetails(string Receiver, string Phone, string Address, string? Note);
+// Where the order goes, snapshotted onto the order. Can only be obtained through Create,
+// so holding a ShippingDetails means it has already been validated — checkout relies on
+// that to reject a bad address BEFORE it reserves any stock.
+public sealed record ShippingDetails
+{
+    private ShippingDetails(string receiver, string phone, string address, string? note)
+    {
+        Receiver = receiver;
+        Phone = phone;
+        Address = address;
+        Note = note;
+    }
+
+    public string Receiver { get; }
+
+    public string Phone { get; }
+
+    public string Address { get; }
+
+    public string? Note { get; }
+
+    public static ShippingDetails Create(string? receiver, string? phone, string? address, string? note) =>
+        new(
+            Required(receiver, "Receiver", 100),
+            Required(phone, "Phone", 20),
+            Required(address, "Address", 500),
+            string.IsNullOrWhiteSpace(note) ? null : note.Trim());
+
+    private static string Required(string? value, string field, int maxLength)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            throw new DomainValidationException($"{field} must not be empty.");
+        }
+
+        value = value.Trim();
+
+        if (value.Length > maxLength)
+        {
+            throw new DomainValidationException($"{field} must not exceed {maxLength} characters.");
+        }
+
+        return value;
+    }
+}
 
 // Aggregate root. Every status change goes through a method here, so the lifecycle rules
 // live in one place and cannot be bypassed by a handler setting a property.
@@ -68,7 +112,12 @@ public sealed class Order
             throw new DomainValidationException("An order needs at least one item.");
         }
 
-        var order = new Order(id, userId, Validate(shipping), now);
+        if (shipping is null)
+        {
+            throw new DomainValidationException("Shipping details are required.");
+        }
+
+        var order = new Order(id, userId, shipping, now);
 
         foreach (var line in lines)
         {
@@ -154,36 +203,5 @@ public sealed class Order
 
         Status = OrderStatus.Expired;
         UpdatedAt = now;
-    }
-
-    private static ShippingDetails Validate(ShippingDetails shipping)
-    {
-        if (shipping is null)
-        {
-            throw new DomainValidationException("Shipping details are required.");
-        }
-
-        return new ShippingDetails(
-            Required(shipping.Receiver, "Receiver", 100),
-            Required(shipping.Phone, "Phone", 20),
-            Required(shipping.Address, "Address", 500),
-            string.IsNullOrWhiteSpace(shipping.Note) ? null : shipping.Note.Trim());
-    }
-
-    private static string Required(string? value, string field, int maxLength)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-        {
-            throw new DomainValidationException($"{field} must not be empty.");
-        }
-
-        value = value.Trim();
-
-        if (value.Length > maxLength)
-        {
-            throw new DomainValidationException($"{field} must not exceed {maxLength} characters.");
-        }
-
-        return value;
     }
 }
