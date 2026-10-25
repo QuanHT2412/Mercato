@@ -26,6 +26,7 @@
     <Project Path="src/Services/Ordering/Mercato.Ordering.Api/Mercato.Ordering.Api.csproj" />
     <Project Path="src/Services/Ordering/Mercato.Ordering.Application/Mercato.Ordering.Application.csproj" />
     <Project Path="src/Services/Ordering/Mercato.Ordering.Domain/Mercato.Ordering.Domain.csproj" />
+    <Project Path="src/Services/Ordering/Mercato.Ordering.Infrastructure/Mercato.Ordering.Infrastructure.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Catalog.IntegrationTests/Catalog.IntegrationTests.csproj" />
