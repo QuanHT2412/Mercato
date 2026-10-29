@@ -41,9 +41,13 @@ var catalogApi = builder.AddProject<Projects.Mercato_Catalog_Api>("catalog-api")
     .WaitFor(redis)
     .WithEnvironment("Jwt__PublicKey", jwtPublicKey);
 
+// Ordering calls Catalog's gRPC StockService at checkout — the reference is what makes
+// "https://catalog-api" resolvable through service discovery inside Ordering.
 var orderingApi = builder.AddProject<Projects.Mercato_Ordering_Api>("ordering-api")
     .WithReference(orderingDb)
+    .WithReference(catalogApi)
     .WaitFor(orderingDb)
+    .WaitFor(catalogApi)
     .WithEnvironment("Jwt__PublicKey", jwtPublicKey);
 
 // Optional: without it Identity simply does not seed an admin account. Read straight

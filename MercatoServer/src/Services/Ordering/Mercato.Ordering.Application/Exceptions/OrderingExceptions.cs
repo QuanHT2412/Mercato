@@ -34,6 +34,15 @@ public sealed class OutOfStockException : Exception
     public int AvailableQuantity { get; }
 }
 
+// Catalog could not be reached, or answered with an error rather than a result. Distinct
+// from OutOfStockException: this is "we could not find out", not "there is none".
+public sealed class StockServiceException : Exception
+{
+    public StockServiceException(string message, Exception innerException) : base(message, innerException)
+    {
+    }
+}
+
 // Someone else changed the same row between our read and our write (the order was paid
 // while it was being cancelled, expired while it was being paid, ...). The caller should
 // reload and decide again.

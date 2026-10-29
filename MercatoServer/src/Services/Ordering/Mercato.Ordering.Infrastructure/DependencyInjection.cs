@@ -1,4 +1,7 @@
+using Mercato.Catalog.Grpc;
 using Mercato.Ordering.Application.Abstractions;
+using Mercato.Ordering.Infrastructure.Catalog;
+using Mercato.Ordering.Infrastructure.Payments;
 using Mercato.Ordering.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,6 +20,16 @@ public static class DependencyInjection
         builder.Services.AddScoped<ICartRepository, CartRepository>();
         builder.Services.AddScoped<IOrderRepository, OrderRepository>();
         builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+        // "catalog-api" is not a hostname: the AppHost reference + service discovery
+        // (ServiceDefaults turns it on for every HttpClient, the gRPC client included)
+        // resolve it to wherever Catalog is actually listening. https because gRPC needs
+        // HTTP/2, which Kestrel only negotiates over TLS.
+        builder.Services.AddGrpcClient<StockService.StockServiceClient>(options =>
+            options.Address = new Uri(builder.Configuration["Catalog:GrpcAddress"] ?? "https://catalog-api"));
+        builder.Services.AddScoped<IStockGateway, GrpcStockGateway>();
+
+        builder.Services.AddSingleton<IPaymentProvider, MockPaymentProvider>();
 
         return builder;
     }

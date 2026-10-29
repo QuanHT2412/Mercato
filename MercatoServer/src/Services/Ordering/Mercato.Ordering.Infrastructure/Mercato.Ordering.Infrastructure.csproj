@@ -7,6 +7,12 @@
 
   <ItemGroup>
     <PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="13.6.5" />
+    <PackageReference Include="Google.Protobuf" Version="3.36.2" />
+    <PackageReference Include="Grpc.Net.ClientFactory" Version="2.85.0" />
+    <PackageReference Include="Grpc.Tools" Version="2.85.0">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
     <!-- Same pin as the other services: keep Design in step with the EF Core version the
          Aspire Npgsql component resolves, not the newest patch. -->
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.8">
@@ -14,6 +20,13 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Catalog owns the contract; this compiles a CLIENT from Catalog's own .proto file
+         (linked, not copied) so the two sides cannot drift apart. No project reference
+         to Catalog — services share a wire contract, never code. -->
+    <Protobuf Include="..\..\Catalog\Mercato.Catalog.Api\Protos\stock.proto" GrpcServices="Client" Link="Protos\stock.proto" />
   </ItemGroup>
 
   <PropertyGroup>
