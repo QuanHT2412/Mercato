@@ -17,6 +17,7 @@ public static class DependencyInjection
         services.AddScoped<CheckoutHandler>();
         services.AddScoped<PayOrderHandler>();
         services.AddScoped<CancelOrderHandler>();
+        services.AddScoped<ExpireOrderHandler>();
         services.AddScoped<GetOrderHandler>();
         services.AddScoped<ListOrdersHandler>();
 

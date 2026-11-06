@@ -26,6 +26,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+// Recurring job that expires orders left unpaid past their 15-minute window.
+app.Services.ScheduleOrderingJobs();
+
 app.UseExceptionHandler();
 app.UseAuthentication();
 app.UseAuthorization();
