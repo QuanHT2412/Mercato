@@ -33,6 +33,7 @@
     <Project Path="tests/Catalog.Tests/Catalog.Tests.csproj" />
     <Project Path="tests/Identity.IntegrationTests/Identity.IntegrationTests.csproj" />
     <Project Path="tests/Identity.Tests/Identity.Tests.csproj" />
+    <Project Path="tests/Ordering.IntegrationTests/Ordering.IntegrationTests.csproj" />
     <Project Path="tests/Ordering.Tests/Ordering.Tests.csproj" />
   </Folder>
 </Solution>
